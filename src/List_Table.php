@@ -68,7 +68,7 @@ class List_Table extends \WP_List_Table {
 
 		$action = 'bulk-' . $this->_args['plural'];
 
-		if ( empty( $_POST['id'] ) || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], $action ) ) {
+		if ( empty( $_GET['id'] ) || empty( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], $action ) ) {
 			return;
 		}
 
@@ -82,7 +82,7 @@ class List_Table extends \WP_List_Table {
 		$db = Logger::get_instance()->get_handler( 'db' );
 
 		if ( $db && 'delete' === $action ) {
-			$db->delete( $_POST['id'] );
+			$db->delete( $_GET['id'] );
 		}
 
 		do_action( 'hizzle_logs_process_bulk_action', $action, $this );
@@ -116,7 +116,7 @@ class List_Table extends \WP_List_Table {
 		}
 
 		// Order by.
-		$orderby = ! empty( $_GET['orderby'] ) ? esc_sql( sanitize_key( $_GET['orderby'] ) ) : 'timestamp';
+		$orderby = ! empty( $_GET['orderby'] ) ? esc_sql( sanitize_key( $_GET['orderby'] ) ) : 'log_id';
 		$order   = empty( $_GET['order'] ) || 'desc' === strtolower( $_GET['order'] ) ? 'DESC' : 'ASC';
 
 		$sql .= " ORDER BY `{$orderby}` {$order}";
