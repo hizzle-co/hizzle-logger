@@ -66,6 +66,9 @@ class Logger {
 		// Auto-clear hooks.
 		add_action( 'hizzle_log_clear_logs', array( $this, 'clear_expired_logs' ) );
 
+		// Allow users to view logs.
+		add_action( 'admin_menu', array( $this, 'add_menu' ) );
+
 		// Fire action after loading.
 		do_action( 'hizzle_logger_loaded' );
 
@@ -447,4 +450,28 @@ class Logger {
 		}
 	}
 
+	/**
+     * Add a menu item to the tools section.
+     */
+    public function add_menu() {
+
+		if ( apply_filters( 'hizzle_logger_admin_show_menu', false ) ) {
+			add_submenu_page(
+				'tools.php',
+				__( 'Debug Log', 'hizzle-logger' ),
+				__( 'Debug Log', 'hizzle-logger' ),
+				'manage_options',
+				'hizzle-logger',
+				array( $this, 'render_admin_page' )
+			);
+		}
+    }
+
+	/**
+     * Render the admin page.
+     */
+    public function render_page() {
+		// Display the list of available log messages.
+		require_once plugin_dir_path( __FILE__ ) . 'html-log-list.php';
+    }
 }

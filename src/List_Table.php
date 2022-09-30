@@ -68,7 +68,7 @@ class List_Table extends \WP_List_Table {
 
 		$action = 'bulk-' . $this->_args['plural'];
 
-		if ( empty( $_GET['id'] ) || empty( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], $action ) ) {
+		if ( empty( $_POST['id'] ) || empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], $action ) ) {
 			return;
 		}
 
@@ -82,7 +82,7 @@ class List_Table extends \WP_List_Table {
 		$db = Logger::get_instance()->get_handler( 'db' );
 
 		if ( $db && 'delete' === $action ) {
-			$db->delete( $_GET['id'] );
+			$db->delete( $_POST['id'] );
 		}
 
 		do_action( 'hizzle_logs_process_bulk_action', $action, $this );
@@ -111,12 +111,12 @@ class List_Table extends \WP_List_Table {
 		}
 
 		// Filter by level.
-		if ( ! empty( $_GET['hlog_level'] ) && Levels::is_valid_level( $_GET['hlog_level'] ) ) {
-			$sql .= $wpdb->prepare( ' AND `level` = %d', Levels::get_level_severity( $_GET['hlog_level'] ) );
+		if ( ! empty( $_GET['hlog_level'] ) && Levels::is_valid_level( sanitize_text_field( $_GET['hlog_level'] ) ) ) {
+			$sql .= $wpdb->prepare( ' AND `level` = %d', Levels::get_level_severity( sanitize_text_field( $_GET['hlog_level'] ) ) );
 		}
 
 		// Order by.
-		$orderby = ! empty( $_GET['orderby'] ) ? esc_sql( sanitize_key( $_GET['orderby'] ) ) : 'log_id';
+		$orderby = ! empty( $_GET['orderby'] ) ? esc_sql( sanitize_key( $_GET['orderby'] ) ) : 'timestamp';
 		$order   = empty( $_GET['order'] ) || 'desc' === strtolower( $_GET['order'] ) ? 'DESC' : 'ASC';
 
 		$sql .= " ORDER BY `{$orderby}` {$order}";
