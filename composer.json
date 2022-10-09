@@ -1,6 +1,6 @@
 {
     "name": "hizzle/logger",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "type": "library",
     "description": "A standardized way of logging errors for your projects",
     "keywords": ["wordpress","hizzle","log"],

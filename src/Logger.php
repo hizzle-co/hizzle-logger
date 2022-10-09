@@ -470,7 +470,7 @@ class Logger {
 	/**
      * Render the admin page.
      */
-    public function render_page() {
+    public function render_admin_page() {
 		// Display the list of available log messages.
 		require_once plugin_dir_path( __FILE__ ) . 'html-log-list.php';
     }

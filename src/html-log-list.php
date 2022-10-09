@@ -14,7 +14,7 @@
 
 	<h1 class="wp-heading-inline"><?php esc_html_e( 'Debug Log', 'hizzle-logger' ); ?></h1>
 
-	<form id="hizzle-logger-table" method="POST">
+	<form id="hizzle-logger-table" method="POST" action="<?php echo esc_url( admin_url( 'tools.php?page=hizzle-logger' ) ); ?>">
 		<?php $logs_table->search_box( __( 'Search', 'hizzle-logger' ), 'search' ); ?>
 		<?php $logs_table->display(); ?>
 	</form>

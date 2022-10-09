@@ -81,8 +81,19 @@ class List_Table extends \WP_List_Table {
 		/**@var Handlers\DB $db */
 		$db = Logger::get_instance()->get_handler( 'db' );
 
-		if ( $db && 'delete' === $action ) {
-			$db->delete( $_POST['id'] );
+		if ( $db ) {
+
+			if ( 'delete' === $action ) {
+				$db->delete( $_POST['id'] );
+			}
+
+			if ( 'delete_all' === $action ) {
+				if ( ! empty( $_REQUEST['hlog_source'] ) ) {
+					$db->clear( sanitize_text_field( $_REQUEST['hlog_source'] ) );
+				} else {
+					$db->flush();
+				}
+			}
 		}
 
 		do_action( 'hizzle_logs_process_bulk_action', $action, $this );
@@ -98,26 +109,26 @@ class List_Table extends \WP_List_Table {
 		$sql = "SELECT SQL_CALC_FOUND_ROWS * FROM {$wpdb->prefix}hizzle_log WHERE 1=1";
 
 		// Add search query.
-		if ( ! empty( $_GET['s'] ) ) {
-			$search = trim( sanitize_text_field( $_GET['s'] ), '%' );
+		if ( ! empty( $_REQUEST['s'] ) ) {
+			$search = trim( sanitize_text_field( $_REQUEST['s'] ), '%' );
 			$like   = '%' . $wpdb->esc_like( $search ) . '%';
 			$sql   .= $wpdb->prepare( ' AND (`message` LIKE %s OR `context` LIKE %s)', $like, $like );
 		}
 
 		// Filter by source.
-		if ( ! empty( $_GET['hlog_source'] ) ) {
-			$source = sanitize_text_field( $_GET['hlog_source'] );
+		if ( ! empty( $_REQUEST['hlog_source'] ) ) {
+			$source = sanitize_text_field( $_REQUEST['hlog_source'] );
 			$sql   .= $wpdb->prepare( ' AND `source` = %s', $source );
 		}
 
 		// Filter by level.
-		if ( ! empty( $_GET['hlog_level'] ) && Levels::is_valid_level( sanitize_text_field( $_GET['hlog_level'] ) ) ) {
-			$sql .= $wpdb->prepare( ' AND `level` = %d', Levels::get_level_severity( sanitize_text_field( $_GET['hlog_level'] ) ) );
+		if ( ! empty( $_REQUEST['hlog_level'] ) && Levels::is_valid_level( sanitize_text_field( $_REQUEST['hlog_level'] ) ) ) {
+			$sql .= $wpdb->prepare( ' AND `level` = %d', Levels::get_level_severity( sanitize_text_field( $_REQUEST['hlog_level'] ) ) );
 		}
 
 		// Order by.
-		$orderby = ! empty( $_GET['orderby'] ) ? esc_sql( sanitize_key( $_GET['orderby'] ) ) : 'timestamp';
-		$order   = empty( $_GET['order'] ) || 'desc' === strtolower( $_GET['order'] ) ? 'DESC' : 'ASC';
+		$orderby = ! empty( $_REQUEST['orderby'] ) ? esc_sql( sanitize_key( $_REQUEST['orderby'] ) ) : 'log_id';
+		$order   = empty( $_REQUEST['order'] ) || 'desc' === strtolower( $_REQUEST['order'] ) ? 'DESC' : 'ASC';
 
 		$sql .= " ORDER BY `{$orderby}` {$order}";
 
@@ -267,7 +278,8 @@ class List_Table extends \WP_List_Table {
 	protected function get_bulk_actions() {
 
 		$actions = array(
-			'delete' => __( 'Delete', 'hizzle-logger' ),
+			'delete'     => __( 'Delete', 'hizzle-logger' ),
+			'delete_all' => __( 'Delete All', 'hizzle-logger' ),
 		);
 
 		/**
@@ -293,8 +305,8 @@ class List_Table extends \WP_List_Table {
 			return;
 		}
 
-		$level   = isset( $_GET['hlog_level'] ) ? sanitize_text_field( $_GET['hlog_level'] ) : '';
-		$source  = isset( $_GET['hlog_source'] ) ? sanitize_text_field( $_GET['hlog_source'] ) : '';
+		$level   = isset( $_REQUEST['hlog_level'] ) ? sanitize_text_field( $_REQUEST['hlog_level'] ) : '';
+		$source  = isset( $_REQUEST['hlog_source'] ) ? sanitize_text_field( $_REQUEST['hlog_source'] ) : '';
 		$sources = $wpdb->get_col( "SELECT DISTINCT source FROM {$wpdb->prefix}hizzle_log" );
 		?>
 		<div class="alignleft actions">
