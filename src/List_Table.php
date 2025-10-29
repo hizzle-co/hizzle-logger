@@ -252,7 +252,11 @@ class List_Table extends \WP_List_Table {
 					unset( $context['source'] );
 				}
 
-				$value = '<pre style="overflow: auto;">' . esc_html( json_encode( $context, JSON_PRETTY_PRINT ) ) . '</pre>';
+				$value = sprintf(
+					'<div class="hizzle-logger-json-tree" data-json="%s"></div>',
+					esc_attr( wp_json_encode( $context ) )
+				);
+
 				break;
 		}
 

@@ -456,13 +456,53 @@ class Logger {
     public function add_menu() {
 
 		if ( apply_filters( 'hizzle_logger_admin_show_menu', false ) ) {
-			add_submenu_page(
+			$hook_prefix = add_submenu_page(
 				'tools.php',
 				__( 'Debug Log', 'hizzle-logger' ),
 				__( 'Debug Log', 'hizzle-logger' ),
 				'manage_options',
 				'hizzle-logger',
 				array( $this, 'render_admin_page' )
+			);
+
+			add_action(
+				'admin_enqueue_scripts',
+				function ( $hook ) use ( $hook_prefix ) {
+					if ( $hook === $hook_prefix ) {
+						wp_enqueue_script(
+							'hizzle-logger-json-tree',
+							plugin_dir_url( __FILE__ ) . 'json-tree.js',
+							array(),
+							$this->version,
+							true
+						);
+
+						wp_add_inline_script(
+							'hizzle-logger-json-tree',
+							'document.addEventListener("DOMContentLoaded", function() {
+								var elements = document.querySelectorAll(".hizzle-logger-json-tree[data-json]");
+								elements.forEach(function(wrapper) {
+									try {
+										var data = JSON.parse(wrapper.getAttribute("data-json"));
+										var tree = jsonTree.create(data, wrapper);
+										tree.expand(function(node) {
+											return node.childNodes.length < 2;
+										});
+									} catch (e) {
+										console.error("Error parsing JSON:", e);
+									}
+								});
+							});'
+						);
+
+						wp_enqueue_style(
+							'hizzle-logger-json-tree',
+							plugin_dir_url( __FILE__ ) . 'json-tree.css',
+							array(),
+							$this->version
+						);
+					}
+				}
 			);
 		}
     }
